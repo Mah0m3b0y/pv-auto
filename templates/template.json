@@ -291,15 +291,19 @@
         "type": "SystemAssigned"
       },
       "tags": {
-        "resourceByPass": "allowed"
+        "resourceByPass": "allowed",
+        "[parameters('resourceTags')]"
       }
     },
+
     {
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
       "apiVersion": "2018-11-30",
       "name": "configDeployer",
+      "tags": "[parameters('resourceTags')]",
       "location": "[variables('location')]"
     },
+
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-08-01-preview",
@@ -313,20 +317,24 @@
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', 'configDeployer')]"
       ]
     },
+
     {
       "type": "Microsoft.Sql/servers",
       "apiVersion": "2021-02-01-preview",
       "name": "[format('pvdemo{0}-sqlsvr', variables('suffix'))]",
+      "tags": "[parameters('resourceTags')]",
       "location": "[variables('location')]",
       "properties": {
         "administratorLogin": "[parameters('sqlServerAdminLogin')]",
         "administratorLoginPassword": "[parameters('sqlServerAdminPassword')]"
       }
     },
+
     {
       "type": "Microsoft.Sql/servers/databases",
       "apiVersion": "2021-02-01-preview",
       "name": "[format('{0}/{1}', format('pvdemo{0}-sqlsvr', variables('suffix')), format('pvdemo{0}-sqldb', variables('suffix')))]",
+      "tags": "[parameters('resourceTags')]",
       "location": "[variables('location')]",
       "sku": {
         "name": "GP_S_Gen5",
@@ -345,10 +353,12 @@
         "[resourceId('Microsoft.Sql/servers', format('pvdemo{0}-sqlsvr', variables('suffix')))]"
       ]
     },
+
     {
       "type": "Microsoft.KeyVault/vaults",
       "apiVersion": "2021-04-01-preview",
       "name": "[format('pvdemo{0}-keyvault', variables('suffix'))]",
+      "tags": "[parameters('resourceTags')]",
       "location": "[variables('location')]",
       "properties": {
         "sku": {
@@ -390,10 +400,12 @@
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', 'configDeployer')]"
       ]
     },
+
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-04-01",
       "name": "[format('pvdemo{0}adls', variables('suffix'))]",
+      "tags": "[parameters('resourceTags')]",
       "location": "[variables('location')]",
       "kind": "StorageV2",
       "sku": {
@@ -403,6 +415,7 @@
         "isHnsEnabled": true
       }
     },
+
     {
       "type": "Microsoft.DataFactory/factories",
       "apiVersion": "2018-06-01",
@@ -418,16 +431,19 @@
         "type": "SystemAssigned"
       },
       "tags": {
-        "catalogUri": "[format('{0}.catalog.purview.azure.com', format('pvdemo{0}-pv', variables('suffix')))]"
+        "catalogUri": "[format('{0}.catalog.purview.azure.com', format('pvdemo{0}-pv', variables('suffix')))]",
+        "[parameters('resourceTags')]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Purview/accounts', format('pvdemo{0}-pv', variables('suffix')))]"
       ]
     },
+
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-04-01",
       "name": "[format('pvdemo{0}synapsedl', variables('suffix'))]",
+      "tags": "[parameters('resourceTags')]",
       "location": "[variables('location')]",
       "kind": "StorageV2",
       "sku": {
@@ -445,10 +461,12 @@
         "accessTier": "Hot"
       }
     },
+
     {
       "type": "Microsoft.Synapse/workspaces",
       "apiVersion": "2021-05-01",
       "name": "[format('pvdemo{0}-synapse', variables('suffix'))]",
+      "tags": "[parameters('resourceTags')]",
       "location": "[variables('location')]",
       "properties": {
         "defaultDataLakeStorage": {
@@ -467,6 +485,7 @@
         "[resourceId('Microsoft.Storage/storageAccounts', format('pvdemo{0}synapsedl', variables('suffix')))]"
       ]
     },
+
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-08-01-preview",
@@ -482,6 +501,7 @@
         "[resourceId('Microsoft.Purview/accounts', format('pvdemo{0}-pv', variables('suffix')))]"
       ]
     },
+
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-08-01-preview",
@@ -516,6 +536,7 @@
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2020-10-01",
       "name": "script",
+      "tags": "[parameters('resourceTags')]",
       "location": "[variables('location')]",
       "kind": "AzurePowerShell",
       "properties": {
