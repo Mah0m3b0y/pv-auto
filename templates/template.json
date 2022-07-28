@@ -432,7 +432,12 @@
       },
       "tags": {
         "catalogUri": "[format('{0}.catalog.purview.azure.com', format('pvdemo{0}-pv', variables('suffix')))]",
-        "[parameters('resourceTags')]"
+        "chargecode": "800000059309",
+        "department": "tax",
+        "environment": "qa",
+        "project": "dgdf",
+        "region": "us",
+        "technicalcontact": "rkhatri@kpmg.com"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Purview/accounts', format('pvdemo{0}-pv', variables('suffix')))]"
