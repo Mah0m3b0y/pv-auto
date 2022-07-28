@@ -144,7 +144,12 @@
       },
       "tags": {
         "resourceByPass": "allowed",
-        "[parameters('resourceTags')]"
+        "chargecode": "800000059309",
+        "department": "tax",
+        "environment": "qa",
+        "project": "dgdf",
+        "region": "us",
+        "technicalcontact": "rkhatri@kpmg.com"
       }
     },
 
