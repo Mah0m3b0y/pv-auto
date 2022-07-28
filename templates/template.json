@@ -138,10 +138,6 @@
       "type": "Microsoft.Purview/accounts",
       "apiVersion": "2021-07-01",
       "name": "[format('pvdemo{0}-pv', variables('suffix'))]",
-      "location": "[variables('location')]",
-      "identity": {
-        "type": "SystemAssigned"
-      },
       "tags": {
         "resourceByPass": "allowed",
         "chargecode": "800000059309",
@@ -150,7 +146,12 @@
         "project": "dgdf",
         "region": "us",
         "technicalcontact": "rkhatri@kpmg.com"
-      }
+      },
+      "location": "[variables('location')]",
+      "identity": {
+        "type": 'SystemAssigned'
+      },
+
     },
 
     {
