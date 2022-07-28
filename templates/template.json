@@ -149,7 +149,7 @@
       },
       "location": "[variables('location')]",
       "identity": {
-        "type": 'SystemAssigned'
+        "type": "String"
       },
 
     },
