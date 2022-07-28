@@ -417,34 +417,6 @@
     },
 
     {
-      "type": "Microsoft.DataFactory/factories",
-      "apiVersion": "2018-06-01",
-      "name": "[format('pvdemo{0}-adf', variables('suffix'))]",
-      "location": "[variables('location')]",
-      "properties": {
-        "publicNetworkAccess": "Enabled",
-        "purviewConfiguration": {
-          "purviewResourceId": "[resourceId('Microsoft.Purview/accounts', format('pvdemo{0}-pv', variables('suffix')))]"
-        }
-      },
-      "identity": {
-        "type": "SystemAssigned"
-      },
-      "tags": {
-        "catalogUri": "[format('{0}.catalog.purview.azure.com', format('pvdemo{0}-pv', variables('suffix')))]",
-        "chargecode": "800000059309",
-        "department": "tax",
-        "environment": "qa",
-        "project": "dgdf",
-        "region": "us",
-        "technicalcontact": "rkhatri@kpmg.com"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Purview/accounts', format('pvdemo{0}-pv', variables('suffix')))]"
-      ]
-    },
-
-    {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-04-01",
       "name": "[format('pvdemo{0}synapsedl', variables('suffix'))]",
