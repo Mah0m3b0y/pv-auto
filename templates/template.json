@@ -22,7 +22,18 @@
       "metadata": {
         "description": "Please specify a password for the Azure SQL Server administrator. Default value: newGuid()."
       }
-    }
+    },
+    "resourceTags": {
+      "type": "object",
+      "defaultValue": {
+         "chargecode": "800000059309",
+         "department": "tax",
+         "environment": "qa",
+         "project": "dgdf",
+         "region": "us",
+         "technicalcontact": "rkhatri@kpmg.com"
+      }
+   }
   },
   "variables": {
     "tenantId": "[subscription().tenantId]",
