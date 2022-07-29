@@ -150,7 +150,7 @@
       "location": "[variables('location')]",
       "identity": {
         "type": "String"
-      },
+      }
 
     },
 
