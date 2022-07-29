@@ -324,6 +324,6 @@ $run2 = runScan $access_token $sourceAdlsPayload.name $scanAdlsPayload.name
 Invoke-AzDataFactoryV2Pipeline -ResourceGroupName $resourceGroupName -DataFactoryName $adfName -PipelineName $adfPipelineName
 
 # 14. Populate Glossary
-$glossaryGuid = (createGlossary $access_token).guid
-$glossaryTermsTemplateUri = 'https://raw.githubusercontent.com/tayganr/purviewlab/main/assets/import-terms-sample.csv'
-importGlossaryTerms $access_token $glossaryGuid $glossaryTermsTemplateUri
+## $glossaryGuid = (createGlossary $access_token).guid
+## $glossaryTermsTemplateUri = 'https://raw.githubusercontent.com/tayganr/purviewlab/main/assets/import-terms-sample.csv'
+## importGlossaryTerms $access_token $glossaryGuid $glossaryTermsTemplateUri
