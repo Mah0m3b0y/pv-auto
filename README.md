@@ -19,7 +19,7 @@ This repository includes instructions on how to automate the deployment of a pre
 1. [OPTIONAL] Change the SQL Server Admin Password.
     > Note: You do not need to know the password, the post deployment script will automatically store the secret in Key Vault and Purview will use this secret to successfully scan the Azure SQL Database.
 
-## Outcome
+##  Outcome
 
 * The template should take approximately 10 minutes to complete.
 * Once complete, all Azure resources will have been provisioned, RBAC assignments applied, and data plane operations executed, see below for more details.
