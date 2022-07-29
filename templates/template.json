@@ -26,14 +26,14 @@
     "resourceTags": {
       "type": "object",
       "defaultValue": {
-         "chargecode": "800000059309",
-         "department": "tax",
-         "environment": "qa",
-         "project": "dgdf",
-         "region": "us",
-         "technicalcontact": "rkhatri@kpmg.com"
+        "chargecode": "800000059309",
+        "department": "tax",
+        "environment": "qa",
+        "project": "dgdf",
+        "region": "us",
+        "technicalcontact": "rkhatri@kpmg.com"
       }
-   }
+    }
   },
   "variables": {
     "tenantId": "[subscription().tenantId]",
@@ -105,7 +105,155 @@
         "[resourceId('Microsoft.Storage/storageAccounts', format('pvdemo{0}adls', variables('suffix')))]"
       ]
     },
-
+    {
+      "type": "Microsoft.DataFactory/factories/linkedservices",
+      "apiVersion": "2018-06-01",
+      "name": "[format('{0}/{1}', format('pvdemo{0}-adf', variables('suffix')), 'AzureDataLakeStorageLinkedService')]",
+      "properties": {
+        "type": "AzureBlobFS",
+        "typeProperties": {
+          "url": "[reference(resourceId('Microsoft.Storage/storageAccounts', format('pvdemo{0}adls', variables('suffix')))).primaryEndpoints.dfs]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DataFactory/factories', format('pvdemo{0}-adf', variables('suffix')))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', format('pvdemo{0}adls', variables('suffix')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DataFactory/factories/datasets",
+      "apiVersion": "2018-06-01",
+      "name": "[format('{0}/{1}', format('pvdemo{0}-adf', variables('suffix')), 'SourceDataset_a9c')]",
+      "properties": {
+        "linkedServiceName": {
+          "referenceName": "AzureDataLakeStorageLinkedService",
+          "type": "LinkedServiceReference"
+        },
+        "type": "DelimitedText",
+        "typeProperties": {
+          "location": {
+            "type": "AzureBlobFSLocation",
+            "folderPath": "data/2020",
+            "fileSystem": "bing"
+          },
+          "columnDelimiter": "\t",
+          "rowDelimiter": "\n",
+          "escapeChar": "\\",
+          "firstRowAsHeader": true,
+          "quoteChar": "\""
+        },
+        "schema": [
+          {
+            "name": "Date",
+            "type": "String"
+          },
+          {
+            "name": "Query",
+            "type": "String"
+          },
+          {
+            "name": "IsImplicitIntent",
+            "type": "String"
+          },
+          {
+            "name": "Country",
+            "type": "String"
+          },
+          {
+            "name": "PopularityScore",
+            "type": "String"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DataFactory/factories', format('pvdemo{0}-adf', variables('suffix')))]",
+        "[resourceId('Microsoft.DataFactory/factories/linkedservices', format('pvdemo{0}-adf', variables('suffix')), 'AzureDataLakeStorageLinkedService')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DataFactory/factories/datasets",
+      "apiVersion": "2018-06-01",
+      "name": "[format('{0}/{1}', format('pvdemo{0}-adf', variables('suffix')), 'SourceDestination_a9c')]",
+      "properties": {
+        "linkedServiceName": {
+          "referenceName": "AzureDataLakeStorageLinkedService",
+          "type": "LinkedServiceReference"
+        },
+        "type": "Parquet",
+        "typeProperties": {
+          "location": {
+            "type": "AzureBlobFSLocation",
+            "fileName": "merged.parquet",
+            "folderPath": "data",
+            "fileSystem": "bing"
+          },
+          "compressionCodec": "snappy"
+        },
+        "schema": []
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DataFactory/factories', format('pvdemo{0}-adf', variables('suffix')))]",
+        "[resourceId('Microsoft.DataFactory/factories/linkedservices', format('pvdemo{0}-adf', variables('suffix')), 'AzureDataLakeStorageLinkedService')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "apiVersion": "2018-06-01",
+      "name": "[format('{0}/{1}', format('pvdemo{0}-adf', variables('suffix')), 'copyPipeline')]",
+      "properties": {
+        "activities": [
+          {
+            "name": "Copy_a9c",
+            "type": "Copy",
+            "dependsOn": [],
+            "typeProperties": {
+              "source": {
+                "type": "DelimitedTextSource",
+                "storeSettings": {
+                  "type": "AzureBlobFSReadSettings",
+                  "recursive": true,
+                  "wildcardFileName": "*",
+                  "enablePartitionDiscovery": false
+                },
+                "formatSettings": {
+                  "type": "DelimitedTextReadSettings",
+                  "skipLineCount": 0
+                }
+              },
+              "sink": {
+                "type": "ParquetSink",
+                "storeSettings": {
+                  "type": "AzureBlobFSWriteSettings",
+                  "copyBehavior": "MergeFiles"
+                },
+                "formatSettings": {
+                  "type": "ParquetWriteSettings"
+                }
+              },
+              "enableStaging": false,
+              "validateDataConsistency": false
+            },
+            "inputs": [
+              {
+                "referenceName": "SourceDataset_a9c",
+                "type": "DatasetReference"
+              }
+            ],
+            "outputs": [
+              {
+                "referenceName": "SourceDestination_a9c",
+                "type": "DatasetReference"
+              }
+            ]
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DataFactory/factories', format('pvdemo{0}-adf', variables('suffix')))]",
+        "[resourceId('Microsoft.DataFactory/factories/datasets', format('pvdemo{0}-adf', variables('suffix')), 'SourceDestination_a9c')]",
+        "[resourceId('Microsoft.DataFactory/factories/datasets', format('pvdemo{0}-adf', variables('suffix')), 'SourceDataset_a9c')]"
+      ]
+    },
     {
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2021-04-01",
@@ -138,22 +286,13 @@
       "type": "Microsoft.Purview/accounts",
       "apiVersion": "2021-07-01",
       "name": "[format('pvdemo{0}-pv', variables('suffix'))]",
-      "tags": {
-        "resourceByPass": "allowed",
-        "chargecode": "800000059309",
-        "department": "tax",
-        "environment": "qa",
-        "project": "dgdf",
-        "region": "us",
-        "technicalcontact": "rkhatri@kpmg.com"
-      },
+      "tags": "[parameters('resourceTags')]",
       "location": "[variables('location')]",
       "identity": {
-        "type": "String"
+        "type": "SystemAssigned"
       }
 
     },
-
     {
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
       "apiVersion": "2018-11-30",
@@ -161,7 +300,6 @@
       "tags": "[parameters('resourceTags')]",
       "location": "[variables('location')]"
     },
-
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-08-01-preview",
@@ -175,7 +313,6 @@
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', 'configDeployer')]"
       ]
     },
-
     {
       "type": "Microsoft.Sql/servers",
       "apiVersion": "2021-02-01-preview",
@@ -187,7 +324,6 @@
         "administratorLoginPassword": "[parameters('sqlServerAdminPassword')]"
       }
     },
-
     {
       "type": "Microsoft.Sql/servers/databases",
       "apiVersion": "2021-02-01-preview",
@@ -211,7 +347,6 @@
         "[resourceId('Microsoft.Sql/servers', format('pvdemo{0}-sqlsvr', variables('suffix')))]"
       ]
     },
-
     {
       "type": "Microsoft.KeyVault/vaults",
       "apiVersion": "2021-04-01-preview",
@@ -258,7 +393,6 @@
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', 'configDeployer')]"
       ]
     },
-
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-04-01",
@@ -273,7 +407,25 @@
         "isHnsEnabled": true
       }
     },
-
+    {
+      "type": "Microsoft.DataFactory/factories",
+      "apiVersion": "2018-06-01",
+      "name": "[format('pvdemo{0}-adf', variables('suffix'))]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicNetworkAccess": "Enabled",
+        "purviewConfiguration": {
+          "purviewResourceId": "[resourceId('Microsoft.Purview/accounts', format('pvdemo{0}-pv', variables('suffix')))]"
+        }
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "tags": "[parameters('resourceTags')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Purview/accounts', format('pvdemo{0}-pv', variables('suffix')))]"
+      ]
+    },
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-04-01",
@@ -296,7 +448,6 @@
         "accessTier": "Hot"
       }
     },
-
     {
       "type": "Microsoft.Synapse/workspaces",
       "apiVersion": "2021-05-01",
@@ -320,7 +471,6 @@
         "[resourceId('Microsoft.Storage/storageAccounts', format('pvdemo{0}synapsedl', variables('suffix')))]"
       ]
     },
-
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-08-01-preview",
@@ -336,7 +486,21 @@
         "[resourceId('Microsoft.Purview/accounts', format('pvdemo{0}-pv', variables('suffix')))]"
       ]
     },
-
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-08-01-preview",
+      "scope": "[format('Microsoft.Storage/storageAccounts/{0}', format('pvdemo{0}adls', variables('suffix')))]",
+      "name": "[guid(format('ra07{0}', variables('resourceGroupName')))]",
+      "properties": {
+        "principalId": "[reference(resourceId('Microsoft.DataFactory/factories', format('pvdemo{0}-adf', variables('suffix'))), '2018-06-01', 'full').identity.principalId]",
+        "roleDefinitionId": "[variables('role').StorageBlobDataContributor]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DataFactory/factories', format('pvdemo{0}-adf', variables('suffix')))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', format('pvdemo{0}adls', variables('suffix')))]"
+      ]
+    },
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-08-01-preview",
@@ -362,7 +526,7 @@
       "properties": {
         "azPowerShellVersion": "7.2",
         "arguments": "[format('-subscriptionId {0} -resourceGroupName {1} -accountName {2} -objectId {3} -sqlServerAdminLogin {4} -sqlSecretName {5} -vaultUri {6} -sqlServerName {7} -location {8} -sqlDatabaseName {9} -storageAccountName {10} -adfName {11} -adfPipelineName {12} -adfPrincipalId {13}', variables('subscriptionId'), variables('resourceGroupName'), format('pvdemo{0}-pv', variables('suffix')), reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', 'configDeployer')).principalId, parameters('sqlServerAdminLogin'), variables('sqlSecretName'), reference(resourceId('Microsoft.KeyVault/vaults', format('pvdemo{0}-keyvault', variables('suffix')))).vaultUri, format('pvdemo{0}-sqlsvr', variables('suffix')), variables('location'), format('pvdemo{0}-sqldb', variables('suffix')), format('pvdemo{0}adls', variables('suffix')), format('pvdemo{0}-adf', variables('suffix')), 'copyPipeline', reference(resourceId('Microsoft.DataFactory/factories', format('pvdemo{0}-adf', variables('suffix'))), '2018-06-01', 'full').identity.principalId)]",
-        "primaryScriptUri": "https://raw.githubusercontent.com/tayganr/purviewdemo/main/scripts/script.ps1",
+        "primaryScriptUri": "https://raw.githubusercontent.com/Mah0m3b0y/purview5246/main/scripts/script.ps1",
         "forceUpdateTag": "[guid(resourceGroup().id)]",
         "retentionInterval": "PT4H"
       },
@@ -373,8 +537,10 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.DataFactory/factories', format('pvdemo{0}-adf', variables('suffix')))]",
         "[resourceId('Microsoft.Storage/storageAccounts', format('pvdemo{0}adls', variables('suffix')))]",
         "[resourceId('Microsoft.KeyVault/vaults', format('pvdemo{0}-keyvault', variables('suffix')))]",
+        "[resourceId('Microsoft.DataFactory/factories/pipelines', format('pvdemo{0}-adf', variables('suffix')), 'copyPipeline')]",
         "[resourceId('Microsoft.Purview/accounts', format('pvdemo{0}-pv', variables('suffix')))]",
         "[resourceId('Microsoft.Authorization/roleAssignments', guid(format('ra01{0}', variables('resourceGroupName'))))]",
         "[resourceId('Microsoft.Sql/servers/databases', format('pvdemo{0}-sqlsvr', variables('suffix')), format('pvdemo{0}-sqldb', variables('suffix')))]",
